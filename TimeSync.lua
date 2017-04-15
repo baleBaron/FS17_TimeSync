@@ -87,13 +87,15 @@ end
 function TimeSync:hourChanged()
 local minutesLost = MINUTES_PER_HOUR - self.minuteCounter
 
-    for i=1,minutesLost,1 do
-        for _, listener in pairs(g_currentMission.environment.minuteChangeListeners) do
-            listener:minuteChanged()
+    if minutesLost > 0 and minutesLost < MINUTES_PER_HOUR then
+        for i=1,minutesLost,1 do
+            for _, listener in pairs(g_currentMission.environment.minuteChangeListeners) do
+                listener:minuteChanged()
+            end
         end
     end
     
-    self.minuteCounter = 0;
+    self.minuteCounter = 0
     g_currentMission:setTimeScale(1)
 end
 
