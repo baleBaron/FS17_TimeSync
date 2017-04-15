@@ -10,7 +10,7 @@
 <![CDATA[Desc]]>
 		</en>
     </description>
-	<iconFilename>store.dds</iconFilename>
+	<iconFilename>icon.dds</iconFilename>
     <multiplayer supported="true"/>
      <extraSourceFiles>
         <sourceFile filename="TimeSync.lua" />
