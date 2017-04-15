@@ -32,7 +32,8 @@ function TimeSync:loadMap(name)
 local saveYear, saveMonth, saveDay = g_currentMission.missionInfo.saveDate:match("(%d+)-(%d+)-(%d+)")
 local currentYear, currentMonth, currentDay = getDate("%Y-%m-%d"):match("(%d+)-(%d+)-(%d+)")
 
-    self.minuteCounter = g_currentMission.environment.currentMinute
+    self.lastHour = tonumber(getDate("%H")) -- use to track if day changes while synchronizing
+    self.minuteCounter = g_currentMission.environment.currentMinute --counter for minuteChanged() calls
     self.hasSynchronized = false
     self.daysToSync = g_currentMission.missionInfo.isValid and days_from_civil(tonumber(currentYear),tonumber(currentMonth),tonumber(currentDay)) - days_from_civil(tonumber(saveYear),tonumber(saveMonth),tonumber(saveDay)) or 0
        
@@ -58,8 +59,14 @@ function TimeSync:update(dt)
         local currentMinute = tonumber(getDate("%M"))
         local gameHour      = g_currentMission.environment.currentHour
         local gameMinute    = g_currentMission.environment.currentMinute
+
+        if currentHour < self.lastHour then -- day changed
+            self.daysToSync = self.daysToSync + 1
+        end
+        self.lastHour = currentHour
+
         local minutesToSync = self.daysToSync * MINUTES_PER_DAY + (currentHour - gameHour) * MINUTES_PER_HOUR + currentMinute - gameMinute
-        
+
         if minutesToSync > MINUTES_PER_HOUR then
             -- more than one hour to synchronize
             g_currentMission:setTimeScale(TIMESYNC_HOUR_FACTOR)
