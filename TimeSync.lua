@@ -19,7 +19,7 @@ function days_from_civil(y, m, d)
     return era * 146097 + doe - 719468
 end
 
-local TIMESYNC_DAY_FACTOR = 2400
+local TIMESYNC_DAY_FACTOR = 1200
 local TIMESYNC_HOUR_FACTOR = 120
 local TIMESYNC_MINUTE_FACTOR = 30
 
