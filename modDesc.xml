@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="32">
+    <author>baron</author>
+    <version>1.17</version>
+    <title>
+		<en>Time Sync</en>
+    </title>
+    <description>
+		<en>
+<![CDATA[Desc]]>
+		</en>
+    </description>
+	<iconFilename>store.dds</iconFilename>
+    <multiplayer supported="true"/>
+     <extraSourceFiles>
+        <sourceFile filename="TimeSync.lua" />
+    </extraSourceFiles>
+	<inputBindings>
+    </inputBindings>	
+</modDesc>
