@@ -19,9 +19,11 @@ function days_from_civil(y, m, d)
     return era * 146097 + doe - 719468
 end
 
-local TIMESYNC_DAY_FACTOR = 1200
-local TIMESYNC_HOUR_FACTOR = 120
-local TIMESYNC_MINUTE_FACTOR = 30
+local MINUTES_PER_HOUR = 60
+local MINUTES_PER_DAY = MINUTES_PER_HOUR * 24
+
+local TIMESYNC_HOUR_FACTOR = 1200  -- FFWD factor when synchronizing hours
+local TIMESYNC_MINUTE_FACTOR = 120 -- FFWD factor when synchronizing minutes
 
 TimeSync = {}
 addModEventListener(TimeSync);
@@ -52,19 +54,17 @@ end
 
 function TimeSync:update(dt)
     if not self.hasSynchronized and g_currentMission:getIsServer() then
-        local currentHour = tonumber(getDate("%H"))
+        local currentHour   = tonumber(getDate("%H"))
         local currentMinute = tonumber(getDate("%M"))
-        local gameHour = g_currentMission.environment.currentHour
-        local gameMinute = g_currentMission.environment.currentMinute
+        local gameHour      = g_currentMission.environment.currentHour
+        local gameMinute    = g_currentMission.environment.currentMinute
+        local minutesToSync = self.daysToSync * MINUTES_PER_DAY + (currentHour - gameHour) * MINUTES_PER_HOUR + currentMinute - gameMinute
         
-        if self.daysToSync > 0 or currentHour > gameHour+1 then
-            -- at least one hour until synchronized
-            g_currentMission:setTimeScale(TIMESYNC_DAY_FACTOR) 
-        elseif currentHour > gameHour then
-            -- less than one hour until synchronized
-            g_currentMission:setTimeScale(TIMESYNC_HOUR_FACTOR) 
-        elseif currentHour == gameHour and currentMinute > gameMinute then
-            -- hour is synchronized, find minute
+        if minutesToSync > MINUTES_PER_HOUR then
+            -- more than one hour to synchronize
+            g_currentMission:setTimeScale(TIMESYNC_HOUR_FACTOR)
+        elseif minutesToSync > 0 then
+            -- less than one hour to synchronize
             g_currentMission:setTimeScale(TIMESYNC_MINUTE_FACTOR) 
         else
             -- we are synchronized
@@ -78,12 +78,14 @@ function TimeSync:draw()
 end
 
 -- repair lost minuteChanged() calls due to too fast FFWD
+-- game minute changed
 function TimeSync:minuteChanged()
     self.minuteCounter = self.minuteCounter + 1
 end
 
+-- game hour changed
 function TimeSync:hourChanged()
-local minutesLost = 60 - self.minuteCounter
+local minutesLost = MINUTES_PER_HOUR - self.minuteCounter
 
     for i=1,minutesLost,1 do
         for _, listener in pairs(g_currentMission.environment.minuteChangeListeners) do
@@ -95,6 +97,7 @@ local minutesLost = 60 - self.minuteCounter
     g_currentMission:setTimeScale(1)
 end
 
+-- game day changed
 function TimeSync:dayChanged()
     if not self.hasSynchronized then
         self.daysToSync = self.daysToSync - 1
