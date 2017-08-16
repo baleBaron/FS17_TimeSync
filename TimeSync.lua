@@ -54,7 +54,7 @@ function TimeSync:keyEvent(unicode, sym, modifier, isDown)
 end
 
 function TimeSync:update(dt)
-    if not self.hasSynchronized and g_currentMission:getIsServer() then
+    if not self.hasSynchronized and g_currentMission:getIsServer() and g_currentMission.fieldJobManager.currentFieldJob == nil then
         local currentHour   = tonumber(getDate("%H"))
         local currentMinute = tonumber(getDate("%M"))
         local gameHour      = g_currentMission.environment.currentHour
